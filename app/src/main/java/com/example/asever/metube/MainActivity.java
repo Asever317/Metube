@@ -1,38 +1,71 @@
 package com.example.asever.metube;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.support.v4.app.FragmentActivity;
+import com.github.pedrovgs.DraggablePanel;
+import com.google.android.youtube.player.YouTubeInitializationResult;
+import com.google.android.youtube.player.YouTubePlayer;
+import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 
+public class MainActivity extends FragmentActivity  {
 
-public class MainActivity extends ActionBarActivity {
+    private static final int DELAY_MILLIS = 10;
+   DraggablePanel draggablePanel;
+
+    private YouTubePlayer youtubePlayer;
+    private YouTubePlayerSupportFragment youtubeFragment;
+    //////////////////
+    private static final String SECOND_VIDEO_POSTER_THUMBNAIL =
+            "http://media.comicbook.com/wp-content/uploads/2013/07/x-men-days-of-future-past"
+                    + "-wolverine-poster.jpg";
+    private static final String VIDEO_POSTER_TITLE = "X-Men: Days of Future ";
+    private static final String VIDEO_POSTER_THUMBNAIL =
+            "http://4.bp.blogspot.com/-BT6IshdVsoA/UjfnTo_TkBI/AAAAAAAAMWk/JvDCYCoFRlQ/s1600/"
+                    + "xmenDOFP.wobbly.1.jpg";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        draggablePanel =(DraggablePanel)findViewById(R.id.draggable_panel);
+        initializeYoutubeFragment();
+       initializeDraggablePanel();
+
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+    private void initializeYoutubeFragment() {
+        youtubeFragment = new YouTubePlayerSupportFragment();
+        youtubeFragment.initialize(Config.DEVELOPER_KEY, new YouTubePlayer.OnInitializedListener() {
+
+            @Override
+            public void onInitializationSuccess(YouTubePlayer.Provider provider,
+                                                YouTubePlayer player, boolean wasRestored) {
+                if (!wasRestored) {
+                    youtubePlayer = player;
+                    youtubePlayer.loadVideo(Config.YOUTUBE_VIDEO_CODE);
+                    youtubePlayer.setShowFullscreenButton(true);
+                }
+            }
+
+            @Override
+            public void onInitializationFailure(YouTubePlayer.Provider provider,
+                                                YouTubeInitializationResult error) {
+            }
+        });
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+    private void initializeDraggablePanel() {
+        draggablePanel.setFragmentManager(getSupportFragmentManager());
+        draggablePanel.setTopFragment(youtubeFragment);
+        MoviePosterFragment moviePosterFragment = new MoviePosterFragment();
 
-        return super.onOptionsItemSelected(item);
+//        moviePosterFragment.setPoster(VIDEO_POSTER_THUMBNAIL);
+//        moviePosterFragment.setPosterTitle(VIDEO_POSTER_TITLE);
+
+        draggablePanel.setBottomFragment(moviePosterFragment);
+        draggablePanel.initializeView();
     }
+
+
 }
